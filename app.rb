@@ -3,6 +3,7 @@ require 'slim'
 require 'sqlite3'
 require 'bcrypt'
 
+enable :sessions 
 
 get('/')  do
   slim(:register)
@@ -23,7 +24,8 @@ post('/login') do
   pwdigest = result["pwdigest"]
   id = result["id"]
   if BCrypt::Password.new(pwdigest) == password
-    redirect('/todos')
+    session[:id] = id 
+    redirect('/posts')
   else
     "Fel lösen"
   end
@@ -31,8 +33,12 @@ post('/login') do
 end 
 
 
-get('/todos') do
-slim(:"todos/index")
+get('/posts') do
+  id = session[:id].to_i
+  db = SQLite3::Database.new('db/database.db')
+  db.results_as_hash = true
+  result = db.execute(SELECT * FROM )
+  slim(:"posts/index")
 end
 
 
