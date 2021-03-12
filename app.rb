@@ -34,11 +34,13 @@ end
 
 
 get('/posts') do
-  id = session[:id].to_i
+  sessionid = session[:id].to_i
+  id = 1
   db = SQLite3::Database.new('db/database.db')
   db.results_as_hash = true
-  result = db.execute(SELECT * FROM )
-  slim(:"posts/index")
+  result = db.execute("SELECT * FROM exercises WHERE id = ?",id).first
+  slim(:"posts/index",locals:{result:result})
+  
 end
 
 
