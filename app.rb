@@ -35,11 +35,21 @@ end
 
 get('/posts') do
   sessionid = session[:id].to_i
-  id = 1
   db = SQLite3::Database.new('db/database.db')
   db.results_as_hash = true
-  result = db.execute("SELECT * FROM exercises WHERE id = ?",id).first
-  slim(:"posts/index",locals:{result:result})
+  # alldata = db.execute("SELECT * FROM exercises WHERE id = ?",id).first
+  exercises = db.execute("SELECT * FROM exercises")
+
+  db = SQLite3::Database.new('db/database.db')
+  db.results_as_hash = true 
+  posts = db.execute("SELECT * FROM posts")
+
+  db = SQLite3::Database.new('db/database.db')
+  db.results_as_hash = true 
+  relation = db.execute("SELECT * FROM exercises_post_correlation")
+
+  p "TITTA HÄR #{posts}"
+  slim(:"posts/index",locals:{result:exercises,result2:posts,result3:relation})
   
 end
 
