@@ -1,4 +1,9 @@
 div {
     background:rgba(243, 108, 108, 0.2);
-    align-items:center;
   }
+
+p {
+  text-align: center;
+  width: 100%;
+}
+

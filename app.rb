@@ -48,8 +48,32 @@ get('/posts') do
   db.results_as_hash = true 
   relation = db.execute("SELECT * FROM exercises_post_correlation")
 
-  p "TITTA HÄR #{posts}"
-  slim(:"posts/index",locals:{result:exercises,result2:posts,result3:relation})
+  db = SQLite3::Database.new('db/database.db')
+  db.results_as_hash = true 
+  tester = db.execute("SELECT *
+
+
+  FROM posts
+  INNER JOIN exercises_post_correlation ON posts.id = exercises_post_correlation.post_id
+  INNER JOIN exercises ON exercises_post_correlation.exercise_id = exercises.id
+  ")
+
+
+
+#SELECT books.name AS "book name", students.*  
+#FROM  books   
+#JOIN borrowings ON books.book_id = borrowings.book_id  
+#JOIN students ON students.student_id = borrowings.student_id;
+
+
+  
+  
+
+
+
+
+  p "TITTA HÄR #{tester}"
+  slim(:"posts/index",locals:{result:exercises,result2:posts,result3:relation,result4:tester})
   
 end
 
