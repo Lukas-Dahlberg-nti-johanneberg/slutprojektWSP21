@@ -52,7 +52,6 @@ get('/posts') do
   db.results_as_hash = true 
   tester = db.execute("SELECT *
 
-
   FROM posts
   INNER JOIN exercises_post_correlation ON posts.id = exercises_post_correlation.post_id
   INNER JOIN exercises ON exercises_post_correlation.exercise_id = exercises.id

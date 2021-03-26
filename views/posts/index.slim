@@ -2,24 +2,22 @@ h2
     a href="posts" Visa alla Inlägg!
     a href="posts/new" Skapa inlägg!
     
-- result2.each do |result2|
+        
+
+- x = []
+- result4.each do |e|
     div
-        p = "#{result2['name']} #{result2['date']} #{result2['text']}"
-        
+        - if x.include?(e["post_name"])
+            p #{e['name']} #{e['time']} minuter #{e['reps']} reps #{e['sets']} sets
+        - else
+            p "Workout #{e['post_name']}"
+            p #{e['name']} #{e['time']} minuter #{e['reps']} reps #{e['sets']} sets
 
-
-
-
-
-
-        
-
-
-
-
+            - x << e["post_name"]
 
 
 p = result4
+        
 
 
 
