@@ -4,19 +4,35 @@ h2
     
         
 
-- x = []
-- result4.each do |e|
+- n = 0
+- result.each do |e|
     div
-        - if x.include?(e["post_name"])
-            p #{e['name']} #{e['time']} minuter #{e['reps']} reps #{e['sets']} sets
-        - else
-            p "Workout #{e['post_name']}"
-            p #{e['name']} #{e['time']} minuter #{e['reps']} reps #{e['sets']} sets
+        p  #{e[:post_name]} 
+        
+        p #{e[:text]}
 
-            - x << e["post_name"]
+        - while true 
+
+            p Övning #{n+1} #{e[:exercises][n]}  #{e[:sets][n]} sets  #{e[:reps][n]} reps 
+            - n += 1
+            - if n == e[:exercises].count
+                - break
+
+        p #{e[:date]}
+             
+        
 
 
-p = result4
+
+
+
+
+
+    
+
+
+
+p = result
         
 
 

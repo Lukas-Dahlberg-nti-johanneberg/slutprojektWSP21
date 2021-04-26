@@ -36,19 +36,6 @@ end
 get('/posts') do
   sessionid = session[:id].to_i
   db = SQLite3::Database.new('db/database.db')
-  db.results_as_hash = true
-  # alldata = db.execute("SELECT * FROM exercises WHERE id = ?",id).first
-  exercises = db.execute("SELECT * FROM exercises")
-
-  db = SQLite3::Database.new('db/database.db')
-  db.results_as_hash = true 
-  posts = db.execute("SELECT * FROM posts")
-
-  db = SQLite3::Database.new('db/database.db')
-  db.results_as_hash = true 
-  relation = db.execute("SELECT * FROM exercises_post_correlation")
-
-  db = SQLite3::Database.new('db/database.db')
   db.results_as_hash = true 
   tester = db.execute("SELECT *
 
@@ -58,21 +45,54 @@ get('/posts') do
   ")
 
 
+  formatted = []
+  x = ""
+
+  tester.each do |t| 
+    exercises = []
+    reps = []
+    sets = []
+
+
+    x = t['post_name']
+
+    tester.each do |t| 
+
+      if t['post_name'] == x
+        exercises << t['name']
+      end
+
+      if t['post_name'] == x
+        reps << t['reps']
+      end
+
+      if t['post_name'] == x
+        sets << t['reps']
+      end
+      
+
+
+    end
+
+   
+
+    formatted << {post_name: t['post_name'],date: t['date'], catagory: t['catagory'],text: t['text'],post_id: t['post_id'],exercises: exercises, reps: reps, sets: sets}
+
+  end
+
+
+  # formatted.uniq! {|w| w[:title]} #ta bort dubletter
+
+
+  #second loop
 
 #SELECT books.name AS "book name", students.*  
 #FROM  books   
 #JOIN borrowings ON books.book_id = borrowings.book_id  
 #JOIN students ON students.student_id = borrowings.student_id;
-
-
-  
-  
-
-
-
-
-  p "TITTA HÄR #{tester}"
-  slim(:"posts/index",locals:{result:exercises,result2:posts,result3:relation,result4:tester})
+  p tester
+  p formatted.uniq!
+  slim(:"posts/index",locals:{result: formatted})
   
 end
 
