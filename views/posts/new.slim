@@ -1,0 +1,31 @@
+h2 
+    a href="/posts/index" Visa alla Inlägg!
+
+
+h2 Create a new post here:
+form action="/posts" method="POST"
+    input type="text" name="post_name"  placeholder="Enter title of post here"
+    br
+    br
+    textarea name="text" cols="25" rows="3" placeholder="Enter content of post here"     
+    br
+    br
+    label for="exercise" Choose exercise: 
+    select id="exercise" name="exercise"
+        - exercises.each do |a|
+            option value="#{a["name"]}" #{a["name"]}
+    input type="text" name="sets" placeholder="sets"
+    input type="text" name="reps" placeholder="reps"
+    input type="text" name="time" placeholder="time in minutes"
+    br 
+    input type="button" value="add more exercises"
+
+
+    br
+    br
+    label for="catagory" Choose Catagory: 
+    select id="catagory" name="catagory"
+        - formatted.each do |a|
+            option value="#{a[:catagory]}" #{a[:catagory]}
+    br
+    input type="submit" value="Submit!"

@@ -1,26 +1,36 @@
 h2 
-    a href="posts" Visa alla Inlägg!
-    a href="posts/new" Skapa inlägg!
-    
+    a href="/posts/index" Show all Posts!
+    a href="/posts/new" Create Post!
+    a href="/logout" logout!
         
-
+h2 
+    a All posts
 - n = 0
 - result.each do |e|
     div
-        p  #{e[:post_name]} 
+        h3  #{e[:post_name]} 
         
         p #{e[:text]}
-
+        - n = 0
         - while true 
 
-            p Övning #{n+1} #{e[:exercises][n]}  #{e[:sets][n]} sets  #{e[:reps][n]} reps 
+            p Övning #{n+1} #{e[:exercises][n]}  #{e[:sets][n]} sets  #{e[:reps][n]} reps #{e[:time][n]} minut(er) 
             - n += 1
-            - if n == e[:exercises].count
+            - if n >= e[:exercises].count
                 - break
-
-        p #{e[:date]}
-             
         
+        p #{e[:date]}
+        p catagory "#{e[:catagory]}"
+
+        - if e[:user_id] == sessionid
+            form  method="GET" action="/posts/#{e[:post_id]}/edit"
+                input type="submit" value="Edit!"
+        
+        - if e[:user_id] == sessionid
+            form  method="POST" action="/posts/#{e[:post_id]}/delete"
+                input type="submit" value="Delete!"
+
+            
 
 
 

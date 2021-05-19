@@ -1,9 +1,18 @@
 div {
-    background:rgba(243, 108, 108, 0.2);
+    background:rgba(172, 172, 172, 0.2);
+    margin: 10px;
+    border: 1px solid black;
   }
 
 p {
-  text-align: center;
+
   width: 100%;
 }
 
+a {
+  margin: 4px;
+}
+
+h3 {
+ margin: 2px;
+}

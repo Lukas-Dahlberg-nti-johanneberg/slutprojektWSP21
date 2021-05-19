@@ -1,0 +1,25 @@
+h2  
+    a href="/posts/index" Visa alla Inlägg!
+
+form action="/posts/#{id}/update" method="POST"
+    input type="text" name="post_name"  value="#{post[:post_name]}"
+    br
+    br
+    textarea name="text" cols="25" rows="3" #{post[:text]} 
+    br
+    br
+    - i = 0
+    -while post[:exercises].length > i
+        label for="exercise" exercise:#{i+1} 
+        select id="exercise" name="exercise#{i}"
+
+            - exercises.each do |a|
+                option value="#{a["name"]}" selected="#{post[:exercises][i]}" #{a["name"]}
+
+        input type="text" name="sets#{i}" value="#{post[:sets][i]}"
+        input type="text" name="reps#{i}" value="#{post[:reps][i]}"
+        input type="text" name="time#{i}" value="#{post[:time][i]}"
+        - i += 1
+        br
+    input type="hidden" name="i"  value="#{i}"
+    input type="submit" value="Submit!"
