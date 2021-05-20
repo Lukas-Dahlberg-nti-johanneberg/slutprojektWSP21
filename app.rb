@@ -36,7 +36,7 @@ get('/')  do
     linktext = "Go back"
     slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
   else
-    slim(:login)
+    slim(:register)
   end
 end 
 
@@ -160,7 +160,7 @@ end
 # @see model#exercises
 # @see model#formatted
 get('/posts/new') do
-  sessionid = session[:id].to_i
+  sessionid = session[:id].to_i 
   if sessionid == 0
     content = "You have to login before you do that!"
     returnto = "/showlogin"
@@ -212,6 +212,23 @@ post('/posts/:id/update') do
   text = params[:text]
   category = params[:catagory]
 
+  posts = posts()
+
+  posts.each do |e|
+    if e['name_name'] == post_name
+      content = "you need a original name"
+      returnto = "/posts/index"
+      linktext = "Try again"
+      slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+    end 
+  end 
+
+
+  
+    
+  p posts
+
+
   exercises = []
   sets = []
   reps = [] 
@@ -236,13 +253,7 @@ post('/posts/:id/update') do
     j += 1
 
   end 
-  p id 
-  p post_name
-  p text
-  p exercises
-  p sets
-  p reps
-  p times
+ 
 
   db = SQLite3::Database.new('db/database.db')
       db.execute('UPDATE posts SET post_name=?,text=? WHERE id=?',post_name,text,id)
@@ -379,6 +390,7 @@ get('/user/show') do
     slim(:"/user/show",locals:{userdata:userdata})
   end 
 end 
+
 
 get('/user/edit') do
   id = params["id"].to_i
