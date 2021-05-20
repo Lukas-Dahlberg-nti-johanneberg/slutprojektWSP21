@@ -6,8 +6,16 @@ require_relative './model.rb'
 
 enable :sessions 
 
-indlude Model
 
+include Model
+
+# Förhindrar att man ska kunna gå in på sidor utan tillstånd/inlogg
+#  
+#  @session [integer] sessionid, userid of current user 
+#  [string] content, Message for user to show them that a login is required
+#  [string] returnto, modular path the user is being directed to after error
+#  [string] linktext, message for user 
+# end
 before do
   sessionid = session[:id].to_i
   if  request.path_info != '/' && session[:id] == nil && request.path_info != '/error' && request.path_info != '/showlogin'
@@ -19,22 +27,48 @@ before do
   
 end
 
+
+# directs you to register page
 get('/')  do
-  slim(:register)
+  if session[:loggedin] == true
+    content = "you are logged in already, logout first first to change account"
+    returnto = "/posts/index"
+    linktext = "Go back"
+    slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+  else
+    slim(:login)
+  end
 end 
 
+# shows the login page
 get('/showlogin')  do
-  slim(:login)
+  if session[:loggedin] == true
+    content = "you are logged in already, logout first first to change account"
+    returnto = "/posts/index"
+    linktext = "Go back"
+    slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+  else
+    slim(:login)
+  end
+
 end 
 
+
+
+# Login and display posts page
+#
+# @param [String] name, the username of the user
+# @param [String] password, the non-decrypted password of the user
+# @see model#verify_user
 post('/login') do 
   name = params[:username]
   password = params[:password]
   result = verify_user(name, password)
   if result[0] == true 
       session[:id] = result[1] #användarid:et returneras med från en array i verify_user funktionen i model.rb.
-      # session[:usertype] = result[2] #Användarens usertype, d.v.s typ av användare, vilket används till authorization på flera ställen i webbapplikationen.
+      # session[:usertype] = result[2] #Användarens usertype
       session[:name] = name
+      session[:loggedin] = true
       redirect('/posts/index')
   else
       content = "You have either entered the wrong password or used an invalid username."
@@ -44,9 +78,17 @@ post('/login') do
   end
 end
 
+
+# the route is fist of all formatting the posts data which results in the variabel formatted, The formatted data is the used to display the posts.
+# 1 gets all the data from posts and also inner joins correlation tables.
+# 2 The code then creates a better and more usable hash which in turn is being used to create the posts on the site 
+#
+# @session [integer] sessionid, id of curret user
+# @see model#verify_user
+# @see model#userdata
 get('/posts/index') do
   sessionid = session[:id].to_i
-  p sessionid
+
   if sessionid == 0
     content = "You have to login before you do that!"
     returnto = "/showlogin"
@@ -103,22 +145,20 @@ get('/posts/index') do
 
     end
 
+    userdata = userdata(sessionid)
+    p userdata
+    p "#{userdata['privilege']}"
 
-    # formatted.uniq! {|w| w[:title]} #ta bort dubletter
-
-
-    #second loop
-
-    #SELECT books.name AS "book name", students.*  
-    #FROM  books   
-    #JOIN borrowings ON books.book_id = borrowings.book_id  
-    #JOIN students ON students.student_id = borrowings.student_id;
-    #p tester
     formatted.uniq!
-    slim(:"posts/index",locals:{result: formatted, sessionid: sessionid})
+    slim(:"posts/index",locals:{result: formatted, sessionid: sessionid, userdata: userdata})
   end
 end
 
+# Create new user 
+#
+# @session [integer] sessionid, id of curret user
+# @see model#exercises
+# @see model#formatted
 get('/posts/new') do
   sessionid = session[:id].to_i
   if sessionid == 0
@@ -129,12 +169,15 @@ get('/posts/new') do
   else
     formatted = formatted()
     exercises = exercises()
-    p "awdawdawdawdawdawd"
-    p formatted
     slim(:"posts/new", locals:{formatted: formatted, exercises: exercises})
   end
 end
 
+
+# directs you to a from with data from selected post to edit
+#
+# @param [integer] id, id of current post selected
+# @see model#formatted
 get('/posts/:id/edit') do
   id = params["id"].to_i
   formatted = formatted()
@@ -149,10 +192,19 @@ get('/posts/:id/edit') do
       i += 1
     end
   end
-  p a
   slim(:"posts/edit",locals:{id: id, post: a, exercises: exercises})
 end
 
+
+# takes the new data from the edit form and then updates and changes it in the database.
+# 
+# @param [integer] id, id of post
+# @param [integer] i, the amount of exercises in the post  
+# @param [String] post_name, The new name of the post
+# @param [String] text, The new text in the post
+# @param [String] category, the new catagory
+#
+# Sets, time, reps, etc is currently not working as they should. Bc of time they are not going to work
 post('/posts/:id/update') do
   id = params[:id].to_i
   i = params[:i].to_i
@@ -199,6 +251,10 @@ post('/posts/:id/update') do
 
 end
 
+
+# Deletes post data from all tabels affected
+#
+# @param [integer] post_id, id of the post that is going to be deleted
 post('/posts/:id/delete') do
   post_id = params[:id].to_i
   db = SQLite3::Database.new('db/database.db')
@@ -209,6 +265,18 @@ post('/posts/:id/delete') do
       
 end
 
+
+# Creates new post with params 
+#
+# @session [integer] sessionid, id of curret user 
+# @param [String] post_name, name of new post
+# @param [String] text, description / text of the new post
+# @param [String] exercise, the specific exercise
+# @param [String] sets, amount of sets  
+# @param [String] reps, amount of reps
+# @param [String] time, time in minutes 
+# @param [String] catagory, catagory that the post belongs in
+# @session [String] user_id, id of curret user 
 post('/posts') do
   sessionid = session[:id].to_i
   if sessionid == 0
@@ -246,6 +314,12 @@ post('/posts') do
   end
 end
 
+# Create new user
+#
+# @param [String] name, Username
+# @param [String] password, password in raw form
+# @param [String] password_confirm, second time writing password 
+# @see model#add_user
 post('/users/new') do
   name = params[:username]
   password = params[:password]
@@ -270,14 +344,9 @@ post('/users/new') do
       linktext = "Try again"
       slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
     end
-  #else
-  #  content = "Alla Boxes must be filled"
-   # returnto = "/"
-    #linktext = "Try again"
-    #slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
-  #end
 end
 
+# Gives a messae to the user that their new account has been created
 get('/users/created') do
   content = "User has been created!"
   returnto = "/showlogin"
@@ -285,9 +354,35 @@ get('/users/created') do
   slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
 end
 
+# logout from your account
+# end session and resets session data
 get('/logout') do 
   session[:name] = nil
   session[:id] = nil
+  session[:loggedin] = false
   redirect('/')
 end
 
+# show user data
+#
+# @psession [integer] sessionid, id of current user
+# @see model#userdata 
+get('/user/show') do
+  sessionid = session[:id].to_i
+  if sessionid == 0
+    content = "You have to login before you do that!"
+    returnto = "/showlogin"
+    linktext = "Try again"
+    slim(:message, locals:{content: content, returnto: returnto, linktext: linktext})
+  else
+    userdata = userdata(sessionid) 
+    slim(:"/user/show",locals:{userdata:userdata})
+  end 
+end 
+
+get('/user/edit') do
+  id = params["id"].to_i
+  userdata = userdata(id)
+  p userdata
+  slim(:"user/edit",locals:{id: id, userdata: userdata})
+end

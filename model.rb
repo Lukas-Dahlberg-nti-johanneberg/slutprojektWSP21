@@ -1,6 +1,10 @@
 require 'sqlite3'
 
 module Model
+
+    # formatts all post data for use on the site 
+    #
+    # @return [hash] with all the data from posts table innerjoined with correlaton tables. A more exact description can be seen in the code on row 51
     def formatted()
         db = SQLite3::Database.new('db/database.db')
         db.results_as_hash = true 
@@ -52,6 +56,9 @@ module Model
         return formatted
     end
 
+    # connects to the database and gets all avalible exercises 
+    #
+    # @return [hash] with all exercises
     def exercises()
         db = SQLite3::Database.new('db/database.db')
         db.results_as_hash = true 
@@ -59,6 +66,9 @@ module Model
         return exercises
     end
 
+    # connects to the database and gets all avalible correlations betwen posts and exercises
+    #
+    # @return [hash] with exercises_post_correlation data
     def correlation()
         db = SQLite3::Database.new('db/database.db')
         db.results_as_hash = true 
@@ -66,6 +76,9 @@ module Model
         return correlation
     end
 
+    # connects to the database and gets all data from posts
+    #
+    # @return [hash] with posts data
     def posts()
         db = SQLite3::Database.new('db/database.db')
         db.results_as_hash = true 
@@ -73,6 +86,21 @@ module Model
         return posts
     end
 
+    # connects to the database and gets all data from specifik user
+    #
+    # @return [hash] userdata, data over a user
+    def userdata(user_id)
+        db = SQLite3::Database.new('db/database.db')
+        db.results_as_hash = true 
+        userdata = db.execute("SELECT * FROM users WHERE id=?",user_id).first
+        return userdata
+    end
+
+    # Verify the user so that everything is as is should be and nothing is out of order. Password is checked etc.
+    # The function returns true of false depending on if the user is valid or not 
+    # @param [string] name, name of user
+    # @param [string] password, password of user
+    # @return [boolean]
     def verify_user(name, password)
         db = SQLite3::Database.new('db/database.db')
         result = db.execute("SELECT * FROM users WHERE name=?", name).first
@@ -81,7 +109,7 @@ module Model
         id = result[0]
         privilege = result[3]
         if (BCrypt::Password.new(pw_digest) == password) && (name == result[1])
-            return [true, id, privilege] #Detta betyder att användaren blivit authenticatad. Normalt brukar jag hämta ytterligare data om användaren via nya SQL-anrop men jag ansåg det rimligt att hålla användarnamn, id, och usertype med i sessions då dessa kan komma att behövas frekvent under användarens besök på hemsidan.
+            return [true, id, privilege] #Detta betyder att användaren blivit authenticatad.
         else
             return [false]
             #Fel lösenord
@@ -92,6 +120,13 @@ module Model
         end
     end
 
+
+    # checks if the new user is valid, username does exist and a correct password etc.
+    #
+    # @params [string] name, name of user
+    # @params [string] password, password of user
+    # @params [string] password_confirm, confirm password / no misstakes
+    # @return [string] (goodtogo, wrongpass, userexist) One of these 3 is returned
     def check_registration(name, password, password_confirm)
         db = SQLite3::Database.new('db/database.db')
         result = db.execute("SELECT * FROM users WHERE name=?", name).first
@@ -106,6 +141,10 @@ module Model
         end
     end
 
+
+    # Creates a user and gives privilige.
+    # 
+    # @return [boolean]
     def add_user(name, password_digest)
         privilege = "user" #När vi skapar en användare blir den en vanlig användare, admin-behörigheter kan erhållas senare.
         db = SQLite3::Database.new('db/database.db')

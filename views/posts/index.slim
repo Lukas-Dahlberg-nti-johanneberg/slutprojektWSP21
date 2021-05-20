@@ -1,7 +1,6 @@
 h2 
     a href="/posts/index" Show all Posts!
     a href="/posts/new" Create Post!
-    a href="/logout" logout!
         
 h2 
     a All posts
@@ -22,11 +21,11 @@ h2
         p #{e[:date]}
         p catagory "#{e[:catagory]}"
 
-        - if e[:user_id] == sessionid
+        - if e[:user_id] == sessionid || userdata['privilege'] == "admin"  
             form  method="GET" action="/posts/#{e[:post_id]}/edit"
                 input type="submit" value="Edit!"
         
-        - if e[:user_id] == sessionid
+        - if e[:user_id] == sessionid || userdata['privilege'] == "admin" 
             form  method="POST" action="/posts/#{e[:post_id]}/delete"
                 input type="submit" value="Delete!"
 
@@ -42,7 +41,7 @@ h2
 
 
 
-p = result
+
         
 
 

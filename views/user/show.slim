@@ -1,0 +1,17 @@
+
+h2
+    a href="/posts/index" Visa alla Inlägg!
+div
+
+    h2 account details
+    
+    form  method="GET" action="/user/edit"
+        input type="submit" value="Edit!"
+
+    h2 hi #{userdata['name']}
+    br
+    p about you : #{userdata['descript']} 
+    br
+    p you are a : "#{userdata['privilege']}"
+
+
